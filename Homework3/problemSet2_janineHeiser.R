@@ -1,0 +1,121 @@
+##Janine Heiser, Dheera Prabhakar, Ajeeta Dhole
+##Lab 2
+##11/14/2013
+
+## load the dataset into R
+load("/home/j9/Desktop/ISchool/statistics/Homework3/GSS.Rdata")
+
+#create a data set for just the columns of interest
+newdataset <- data.frame(marital = GSS$marital, children = GSS$childs)
+
+#since the dataset has outliers, we want to remove them
+#marital status 'NA' and childs '9' are removed
+newdataset <- newdataset[which(newdataset$marital!="NA"),]
+newdataset <- newdataset[which(newdataset$children<9),]
+nrow(newdataset)
+
+#look at the values of the marital variable
+stuff <- unique(newdataset$marital, incomparables = FALSE)
+stuff
+
+#turn the categories into numbers/factors
+newdataset$martialnumeric <- as.numeric(newdataset$marital) - 1
+
+#code the binary variable, married at some point vs never married
+newdataset$bivar_maritalstatus <- ifelse(newdataset$martialnumeric == 4, "nevermarried", "marriedatsomepoint")
+
+
+#conduct a t-test
+#null hypothesis: μ1 = μc 
+#there is no difference in the mean value of the number of children among individuals who have been married at some point versus those who have never been married
+
+# Check if the distribution of the number of children looks normal using a qqplot and qqline
+#need to check this to meet assumption that variables are normally distributed within each group
+pdf("/home/j9/Desktop/qqnormandline.pdf")
+qqnorm(newdataset$children)
+qqline(newdataset$children)
+dev.off()
+#qqnorm indicates that distribution is normal
+
+#run the shapiro test to see if the means are normally distributed
+##In statistics, the Shapiro–Wilk test tests the null hypothesis that a sample x1, ..., xn came from a normally distributed population
+shapiro.test(newdataset$children)
+##Small values of W are evidence of departure from normality and percentage points for the W statistic; here we have a large W value.
+#the high value of W tells us that our data is normally distributed with a high level of confidence because the P-value is low too
+#need to check assumption of Homogeneity of Variance, but we dont actually need to test this; 
+# If variances are significantly different between groups, we should use a modified t-test that corrects for this problem (Welch’s t-test); welch's t-test is the #default for R
+
+
+# The means of children look different between groups, married at some point never married
+by(newdataset$children, newdataset$bivar_maritalstatus, mean, na.rm = TRUE)
+
+
+# Check to see if difference in the means of number of children between groups statistically significant
+# Use a regular t.test to find out
+t.test(newdataset$children ~ newdataset$bivar_maritalstatus, newdataset)
+
+#tests results are in! we can reject the null hypothesis! #results from R where:
+#t = 30.3933, df = 1027.541, p-value < 2.2e-16
+#alternative hypothesis: true difference in means is not equal to 0
+
+#Since the t-statistics is large positive, this gives some indication that the deficit is greater than the hypothesized value of zero(aka no difference between the means)
+#The positive t-value shows that mean number of children that people have been married at some point is greater than the mean number of children that unmarried #people have. 
+#This means that the alternative hypothesis is true; there is a difference between
+#the mean number of children that of group of individuals that have never been married vs the mean number of children that group of individuals that have been married at some point. 
+#The findings were very signifcant; For the t-test, we had a p-value < 2.2e-16,  
+#meaning that is very unlikely to find the value of our t-statistic; this low p-value shows that there is a difference between the means in our sample.
+
+##Question 2 
+
+#null hypothesis: μ1 = μc 
+#The education level of individuals has no relation to the number of children that individuals have
+
+#create a data set for just the columns of interest
+newlinear <- data.frame(education = GSS$edu, children = GSS$childs )
+ 
+# Use a scatterplot to see how linear the relationship looks; scatter plot shows slight correlation
+pdf("/home/j9/Desktop/correlation_scatter.pdf")
+scatterplot(newlinear$education, newlinear$children)
+dev.off()
+
+##Measures the extent to which two metric or interval-type variables are linearly related
+#check the correlation
+cor.test(newlinear$education, newlinear$children)
+
+##R returned a correlation of -0.1283498 meaning there is a small, negative correlation between the number of  
+##years of education and the number of children. This small negative correlation statistic suggests a slight inverse correlation between the 2 variables  
+##meaning that the larger the number of years of education the less number of children individuals are likely to have. 
+##Nonetheless, the correlation is very weak
+
+##Question 3
+
+#null hypothesis: μ1 = μc 
+#Null Hypothesis: The gender of a person is independent of the voting status
+#Consider the variables sex, vote92. We want to know whether the individual’s gender and their voting status are independent or related.
+
+
+newindy <- data.frame( vote = GSS$vote92 , gender = GSS$sex )
+
+# Consider each individual to be the unit of analysis, and consider two variables:
+#look at the values of the vote variable
+stuff2 <- unique(newindy$vote, incomparables = FALSE)
+stuff2
+
+#transform voting variable to numeric
+newindy$votenumeric <- as.numeric(newindy$vote) - 1
+
+#create a subset of the data removing the NAs and not eligibles from the data set
+newdataindy <- subset(newindy, votenumeric <  3  | votenumeric == 4) 
+
+#code the 2 variables as binary	variables, vote and did not vote
+newdataindy$bivar_vote <- ifelse(newdataindy$votenumeric == 1, "voted", "did not vote")
+
+###get the frequencies for the variables
+cool <- table(newdataindy$gender, newdataindy$bivar_vote)
+
+# We store the results of our chi-square test so we can extract more
+# values from the output
+cs = chisq.test(cool)
+cs
+## based on the high pvalue of .42 which is greater than .05, we fail to reject the null hypothesis; Rather, we accept the null hypothesis, 
+##that voting is independent of gender. 

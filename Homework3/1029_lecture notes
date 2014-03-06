@@ -1,0 +1,8 @@
+sampling error: 
+  to calculate -> std deviation of sample population % the sqrt of the sample size
+  0 is the standard deviation of the random sampling distribution of the estimate across repated sampling at the gvive sample size from the studied population;
+
+normal probablility plot 
+  -in a sample size of n, for the purposes of graphical examination of normality, the gra[h piints (z.5/n, y1), (z 1.5/n, y2) ...(zn - .5/n, yn)
+  -in R is the qqnorm(x)
+  -if sample fails along the NPP then you can say that distribution is normal. 
