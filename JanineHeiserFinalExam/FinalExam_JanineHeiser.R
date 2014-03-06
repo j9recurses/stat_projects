@@ -125,7 +125,7 @@ cool2 <- cool[which( cool$have_children == "Yes"),]
 cool2
 
 #A value that you don't see in anywhere in the number of children variables is the value of 8; I would expect to see that someone would have 8 children
-somewhere in this data set; its a lot of kids but not also unheared of. So, I'm thinking that the value of 98 should be probably be 8.
+#somewhere in this data set; its a lot of kids but not also unheared of. So, Im thinking that the value of 98 should be probably be 8.
 
 #Recreate the data frame again to replace 98 with 8.
 datingdataset3 <- data.frame(have_children = datingdataset_whole$have_children,  children12_17 = datingdataset_whole$children12_17, children0_5 = datingdataset_whole$children0_5, children6_11 = datingdataset_whole$children6_11)
